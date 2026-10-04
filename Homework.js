@@ -1,99 +1,263 @@
 const input = document.querySelector("#productInput");
-const button = document.querySelector("#addButton");
-const list = document.querySelector("#productList");
-const addFromListButton = document.querySelector("#addFromListButton");
+const categoryInput = document.querySelector("#categoryInput");
+const addButton = document.querySelector("#addButton");
 
-const products = [
-  "Молоко",
-  "Картофель",
-  "Лук",
-  "Молоко",
-  "Морковь"
+const list = document.querySelector("#productList");
+
+const allButton = document.querySelector("#allButton");
+const needButton = document.querySelector("#needButton");
+const boughtButton = document.querySelector("#boughtButton");
+
+const createDraftButton = document.querySelector("#createDraftButton");
+const saveDraftButton = document.querySelector("#saveDraftButton");
+const cancelDraftButton = document.querySelector("#cancelDraftButton");
+
+
+let products = [
+  {
+    id: 1,
+    name: "Молоко",
+    category: "Молочные продукты",
+    bought: false
+  },
+  {
+    id: 2,
+    name: "Хлеб",
+    category: "Выпечка",
+    bought: true
+  },
+  {
+    id: 3,
+    name: "Сыр",
+    category: "Молочные продукты",
+    bought: false
+  },
+  {
+    id: 4,
+    name: "Яблоки",
+    category: "Фрукты",
+    bought: false
+  }
 ];
 
 
-// Проверяем, есть ли продукт уже на странице
-function isProductExists(productName) {
+let draftProducts = null;
 
-  const items = list.querySelectorAll("li");
 
-  const normalizedProduct = productName
-    .trim()
-    .toLowerCase();
+// 1. Вывод списка
+function renderProducts(productsToRender) {
 
-  for (const item of items) {
+  list.innerHTML = "";
 
-    const existingProduct = item.textContent
-      .trim()
-      .toLowerCase();
+  for (const product of productsToRender) {
 
-    if (existingProduct === normalizedProduct) {
-      return true;
+    const li = document.createElement("li");
+
+    li.textContent =
+      `${product.name} — ${product.category}`;
+
+    li.dataset.id = product.id;
+
+    if (product.bought) {
+      li.classList.add("bought");
     }
-  }
 
-  return false;
+    li.addEventListener("click", function () {
+      toggleProduct(product.id);
+    });
+
+    list.appendChild(li);
+  }
 }
 
 
-// Добавляет продукт
-function addProductToList(productName) {
+// 2. Добавление продукта
+function addProduct(name, category) {
 
-  productName = productName.trim();
+  name = name.trim();
+  category = category.trim();
 
-  if (productName === "") {
+  if (name === "" || category === "") {
     return;
   }
 
-  // Если продукт уже есть — ничего не делаем
-  if (isProductExists(productName)) {
-    return;
-  }
 
-  const li = document.createElement("li");
+  const isDuplicate = products.some(function (product) {
 
-  li.textContent = productName;
+    return product.name
+      .trim()
+      .toLowerCase() === name.toLowerCase();
 
-  li.addEventListener("click", () => {
-    li.classList.toggle("bought");
   });
 
-  list.append(li);
-}
+
+  if (isDuplicate) {
+    alert("Такой продукт уже есть");
+    return;
+  }
 
 
-// Добавление вручную
-function addProduct() {
+  const newProduct = {
+    id: products.length + 1,
+    name: name,
+    category: category,
+    bought: false
+  };
 
-  const productName = input.value;
 
-  addProductToList(productName);
+  products.push(newProduct);
+
+  renderProducts(products);
+
 
   input.value = "";
-  input.focus();
+  categoryInput.value = "";
 }
 
 
-button.addEventListener("click", addProduct);
+// 3. Куплено / не куплено
+function toggleProduct(id) {
 
-
-// Добавление по Enter
-input.addEventListener("keydown", (event) => {
-
-  if (event.key === "Enter") {
-    addProduct();
-  }
-
-});
-
-
-// Добавление продуктов из массива
-addFromListButton.addEventListener("click", () => {
-
-  products.forEach((product) => {
-
-    addProductToList(product);
-
+  const product = products.find(function (product) {
+    return product.id === id;
   });
 
+
+  product.bought = !product.bought;
+
+  renderProducts(products);
+}
+
+
+// 4. Фильтрация
+function filterProducts(filter) {
+
+  if (filter === "all") {
+    renderProducts(products);
+  }
+
+
+  if (filter === "need") {
+
+    const filteredProducts = products.filter(function (product) {
+      return product.bought === false;
+    });
+
+    renderProducts(filteredProducts);
+  }
+
+
+  if (filter === "bought") {
+
+    const filteredProducts = products.filter(function (product) {
+      return product.bought === true;
+    });
+
+    renderProducts(filteredProducts);
+  }
+}
+
+
+// 5. Создание черновика
+function createDraft() {
+
+  // Поверхностная копия
+  const copy = [...products];
+
+  console.log(products === copy);
+  console.log(products[0] === copy[0]);
+
+
+  // Глубокая копия
+  draftProducts = structuredClone(products);
+
+  console.log(products === draftProducts);
+  console.log(products[0] === draftProducts[0]);
+}
+
+
+// Сохранить черновик
+function saveDraft() {
+
+  if (draftProducts === null) {
+    return;
+  }
+
+  products = structuredClone(draftProducts);
+
+  draftProducts = null;
+
+  renderProducts(products);
+}
+
+
+// Отменить черновик
+function cancelDraft() {
+
+  draftProducts = null;
+
+  renderProducts(products);
+}
+
+
+// Добавление продукта
+addButton.addEventListener("click", function () {
+
+  addProduct(
+    input.value,
+    categoryInput.value
+  );
+
 });
+
+
+// Все
+allButton.addEventListener("click", function () {
+
+  filterProducts("all");
+
+});
+
+
+// Нужно купить
+needButton.addEventListener("click", function () {
+
+  filterProducts("need");
+
+});
+
+
+// Куплено
+boughtButton.addEventListener("click", function () {
+
+  filterProducts("bought");
+
+});
+
+
+// Создать черновик
+createDraftButton.addEventListener("click", function () {
+
+  createDraft();
+
+});
+
+
+// Сохранить
+saveDraftButton.addEventListener("click", function () {
+
+  saveDraft();
+
+});
+
+
+// Отменить
+cancelDraftButton.addEventListener("click", function () {
+
+  cancelDraft();
+
+});
+
+
+// Первый вывод списка
+renderProducts(products);

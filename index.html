@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Список продуктов</title>
 
   <style>
@@ -13,6 +14,7 @@
 
     li {
       cursor: pointer;
+      margin: 5px 0;
     }
   </style>
 
@@ -20,18 +22,48 @@
 </head>
 
 <body>
+
   <h1>Список продуктов</h1>
 
-  <input id="productInput" type="text" placeholder="Введите продукт">
+  <input
+    id="productInput"
+    type="text"
+    placeholder="Название"
+  >
 
-  <button id="addButton">Добавить</button>
+  <input
+    id="categoryInput"
+    type="text"
+    placeholder="Категория"
+  >
 
-  <button id="addFromListButton">
-    Добавить из списка
+  <button id="addButton">
+    Добавить
   </button>
 
-  <h2>Список продуктов:</h2>
+  <hr>
+
+  <button id="allButton">Все</button>
+  <button id="needButton">Нужно купить</button>
+  <button id="boughtButton">Куплено</button>
+
+  <hr>
+
+  <button id="createDraftButton">
+    Создать черновик
+  </button>
+
+  <button id="saveDraftButton">
+    Сохранить изменения
+  </button>
+
+  <button id="cancelDraftButton">
+    Отменить изменения
+  </button>
+
+  <h2>Продукты:</h2>
 
   <ul id="productList"></ul>
+
 </body>
 </html>
